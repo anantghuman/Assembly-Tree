@@ -1,0 +1,6 @@
+*.o
+ac
+testbench.a
+# we are not committing the compiled testbench, we should build it on whatever machine we are on
+
+.vscode/*
