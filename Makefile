@@ -5,10 +5,10 @@ AR=ar
 
 .PHONY: ac_lab
 
-ac: testbench.a
+ac_lab: testbench.a
 	$(GCC) testbench.a functions.s -ggdb -o ac_lab
 
-.PHONY: verify ac
+.PHONY: verify ac_lab
 
 verify:
 	python3 verify.py functions.s
