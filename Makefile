@@ -3,10 +3,10 @@
 GCC=gcc
 AR=ar
 
-.PHONY: ac
+.PHONY: ac_lab
 
 ac: testbench.a
-	$(GCC) testbench.a functions.s -ggdb -o ac
+	$(GCC) testbench.a functions.s -ggdb -o ac_lab
 
 .PHONY: verify ac
 
@@ -17,4 +17,4 @@ verify:
 	echo "Total number of errors: $$half"
 
 clean:
-	rm -f *.o ac
+	rm -f *.o ac_lab
