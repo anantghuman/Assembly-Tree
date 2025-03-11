@@ -10,7 +10,7 @@
  **************************************************************************/
 
  /*
- ** REPLACE THIS YOUR NAME AND EID **
+ ** Anant Ghuman asg3966 **
  */
     
     .arch armv8-a
@@ -27,6 +27,8 @@ hamming_distance:
     // (STUDENT TODO) Code for hamming_distance goes here.
     // Input parameter x is passed in X0; input parameter y is passed in X1.
     // Output value is returned in X0.
+    
+
     ret
     .size   hamming_distance, .-hamming_distance
     // ... and ends with the .size above this line.

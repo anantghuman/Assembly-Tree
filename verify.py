@@ -137,7 +137,7 @@ def verify(line: str):
             return True, ""
 
     # ALU_RI opcodes
-    if opcode in ["ADD", "SUB", "LSL", "LSR", "UBFM" "ASR"]:
+    if opcode in ["ADD", "SUB", "LSL", "LSR", "UBFM", "ASR"]:
         # should be the immediate version
         # Of the form ADD <Xd|SP>, <Xn|SP>, #<imm>
         tokens = re.split(",\\s*|\\s+", line)
