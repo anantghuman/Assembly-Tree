@@ -27,7 +27,39 @@ hamming_distance:
     // (STUDENT TODO) Code for hamming_distance goes here.
     // Input parameter x is passed in X0; input parameter y is passed in X1.
     // Output value is returned in X0.
-    
+
+
+    EOR x0, x0, x1
+
+    AND x1, x0, #0x5555555555555555
+    LSR x2, x0, #1
+    AND x2, x2, #0x5555555555555555
+    ADD x0, x1, x2
+
+    AND x1, x0, #0x3333333333333333
+    LSR x2, x0, #2
+    AND x2, x2, #0x3333333333333333
+    ADD x0, x1, x2
+
+    AND x1, x0, #0x0f0f0f0f0f0f0f0f
+    LSR x2, x0, #4
+    AND x2, x2, #0x0f0f0f0f0f0f0f0f
+    ADD x0, x1, x2
+
+    AND x1, x0, #0x00ff00ff00ff00ff
+    LSR x2, x0, #8
+    AND x2, x2, #0x00ff00ff00ff00ff
+    ADD x0, x1, x2
+
+    AND x1, x0, #0x0000ffff0000ffff
+    LSR x2, x0, #16
+    AND x2, x2, #0x0000ffff0000ffff
+    ADD x0, x1, x2
+
+    AND x1, x0, #0x00000000ffffffff
+    LSR x2, x0, #32
+    AND x2, x2, #0x00000000ffffffff
+    ADD x0, x1, x2
 
     ret
     .size   hamming_distance, .-hamming_distance
