@@ -31,36 +31,61 @@ hamming_distance:
 
     EOR x0, x0, x1
 
-    AND x1, x0, #0x5555555555555555
-    LSR x2, x0, #1
-    AND x2, x2, #0x5555555555555555
-    ADD x0, x1, x2
+    MOVK x3, #0x5555            
+    MOVK x3, #0x5555, LSL #16    
+    MOVK x3, #0x5555, LSL #32   
+    MOVK x3, #0x5555, LSL #48   
+    ANDS  x1, x0, x3             
+    LSR  x2, x0, #1             
+    ANDS  x2, x2, x3            
+    ADDS  x0, x1, x2          
 
-    AND x1, x0, #0x3333333333333333
-    LSR x2, x0, #2
-    AND x2, x2, #0x3333333333333333
-    ADD x0, x1, x2
+    MOVK x3, #0x3333
+    MOVK x3, #0x3333, LSL #16
+    MOVK x3, #0x3333, LSL #32
+    MOVK x3, #0x3333, LSL #48
+    ANDS  x1, x0, x3
+    LSR  x2, x0, #2
+    ANDS  x2, x2, x3
+    ADDS  x0, x1, x2
 
-    AND x1, x0, #0x0f0f0f0f0f0f0f0f
-    LSR x2, x0, #4
-    AND x2, x2, #0x0f0f0f0f0f0f0f0f
-    ADD x0, x1, x2
+    MOVK x3, #0x0F0F
+    MOVK x3, #0x0F0F, LSL #16
+    MOVK x3, #0x0F0F, LSL #32
+    MOVK x3, #0x0F0F, LSL #48
+    ANDS  x1, x0, x3
+    LSR  x2, x0, #4
+    ANDS  x2, x2, x3
+    ADDS  x0, x1, x2
 
-    AND x1, x0, #0x00ff00ff00ff00ff
-    LSR x2, x0, #8
-    AND x2, x2, #0x00ff00ff00ff00ff
-    ADD x0, x1, x2
+    MOVK x3, #0x00FF
+    MOVK x3, #0x00FF, LSL #16
+    MOVK x3, #0x00FF, LSL #32
+    MOVK x3, #0x00FF, LSL #48
+    ANDS  x1, x0, x3
+    LSR  x2, x0, #8
+    ANDS  x2, x2, x3
+    ADDS  x0, x1, x2
 
-    AND x1, x0, #0x0000ffff0000ffff
-    LSR x2, x0, #16
-    AND x2, x2, #0x0000ffff0000ffff
-    ADD x0, x1, x2
+    
+    MOVK x3, #0xFFFF         
+    MOVK x3, #0x0000, LSL #16 
+    MOVK x3, #0xFFFF, LSL #32   
+    MOVK x3, #0x0000, LSL #48   
+    ANDS  x1, x0, x3
+    LSR  x2, x0, #16
+    ANDS  x2, x2, x3
+    ADDS  x0, x1, x2
 
-    AND x1, x0, #0x00000000ffffffff
-    LSR x2, x0, #32
-    AND x2, x2, #0x00000000ffffffff
-    ADD x0, x1, x2
-
+    
+    MOVK x3, #0x0000, LSL #48 
+    MOVK x3, #0x0000, LSL #32    
+    MOVK x3, #0xFFFF, LSL #16   
+    MOVK x3, #0xFFFF, LSL #0
+    ANDS  x1, x0, x3
+    LSR  x2, x0, #32
+    ANDS  x2, x2, x3
+    ADDS  x0, x1, x2
     ret
     .size   hamming_distance, .-hamming_distance
     // ... and ends with the .size above this line.
@@ -74,7 +99,323 @@ transpose:
     // (STUDENT TODO) Code for transpose goes here.
     // Input parameter x is passed in X0.
     // Output value is returned in X0.
+    // x = (x & 0x0000FF00) << 8 | (x >> 8) & 0x0000FF00 | x & 0xFF0000FF;
+    // x = (x & 0x00F000F0) << 4 | (x >> 4) & 0x00F000F0 | x & 0xF00FF00F;
+    // x = (x & 0x0C0C0C0C) << 2 | (x >> 2) & 0x0C0C0C0C | x & 0xC3C3C3C3;
+    // x = (x & 0x22222222) << 1 | (x >> 1) & 0x22222222 | x & 0x99999999;
+    // return x
+    
+    //00000000FFFF0000
+    MOVZ x4, #0x0000
+    MOVK x4, #0xFFFF, LSL #16
+    MOVK x4, #0x0000, LSL #32
+    MOVK x4, #0x0000, LSL #48
 
+    ANDS x1, x0, x4
+    LSL x1, x1, #16
+    LSR x2, x0, #16
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0xFFFF
+    MOVK x4, #0x0000, LSL #16
+    MOVK x4, #0x0000, LSL #32
+    MOVK x4, #0xFFFF, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0xFF00
+    MOVK x4, #0x0000, LSL #16
+    MOVK x4, #0xFF00, LSL #32
+    MOVK x4, #0x0000, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #8
+    LSR x2, x0, #8
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0x00FF
+    MOVK x4, #0xFF00, LSL #16
+    MOVK x4, #0x00FF, LSL #32
+    MOVK x4, #0xFF00, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0x00F0
+    MOVK x4, #0x00F0, LSL #16
+    MOVK x4, #0x00F0, LSL #32
+    MOVK x4, #0x00F0, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #4
+    LSR x2, x0, #4
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0xF00F
+    MOVK x4, #0xF00F, LSL #16
+    MOVK x4, #0xF00F, LSL #32
+    MOVK x4, #0xF00F, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0x0C0C
+    MOVK x4, #0x0C0C, LSL #16
+    MOVK x4, #0x0C0C, LSL #32
+    MOVK x4, #0x0C0C, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #2
+    LSR x2, x0, #2
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0xC3C3
+    MOVK x4, #0xC3C3, LSL #16
+    MOVK x4, #0xC3C3, LSL #32
+    MOVK x4, #0xC3C3, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0x2222
+    MOVK x4, #0x2222, LSL #16
+    MOVK x4, #0x2222, LSL #32
+    MOVK x4, #0x2222, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #1
+    LSR x2, x0, #1
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0x9999
+    MOVK x4, #0x9999, LSL #16
+    MOVK x4, #0x9999, LSL #32
+    MOVK x4, #0x9999, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+    MOVZ x4, #0x0000
+    MOVK x4, #0xFFFF, LSL #16
+    MOVK x4, #0x0000, LSL #32
+    MOVK x4, #0x0000, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #16
+    LSR x2, x0, #16
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0xFFFF
+    MOVK x4, #0x0000, LSL #16
+    MOVK x4, #0x0000, LSL #32
+    MOVK x4, #0xFFFF, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0xFF00
+    MOVK x4, #0x0000, LSL #16
+    MOVK x4, #0xFF00, LSL #32
+    MOVK x4, #0x0000, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #8
+    LSR x2, x0, #8
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0x00FF
+    MOVK x4, #0xFF00, LSL #16
+    MOVK x4, #0x00FF, LSL #32
+    MOVK x4, #0xFF00, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0x00F0
+    MOVK x4, #0x00F0, LSL #16
+    MOVK x4, #0x00F0, LSL #32
+    MOVK x4, #0x00F0, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #4
+    LSR x2, x0, #4
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0xF00F
+    MOVK x4, #0xF00F, LSL #16
+    MOVK x4, #0xF00F, LSL #32
+    MOVK x4, #0xF00F, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0x0C0C
+    MOVK x4, #0x0C0C, LSL #16
+    MOVK x4, #0x0C0C, LSL #32
+    MOVK x4, #0x0C0C, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #2
+    LSR x2, x0, #2
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0xC3C3
+    MOVK x4, #0xC3C3, LSL #16
+    MOVK x4, #0xC3C3, LSL #32
+    MOVK x4, #0xC3C3, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0x2222
+    MOVK x4, #0x2222, LSL #16
+    MOVK x4, #0x2222, LSL #32
+    MOVK x4, #0x2222, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #1
+    LSR x2, x0, #1
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0x9999
+    MOVK x4, #0x9999, LSL #16
+    MOVK x4, #0x9999, LSL #32
+    MOVK x4, #0x9999, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+    MOVZ x4, #0x0000
+    MOVK x4, #0xFFFF, LSL #16
+    MOVK x4, #0x0000, LSL #32
+    MOVK x4, #0x0000, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #16
+    LSR x2, x0, #16
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0xFFFF
+    MOVK x4, #0x0000, LSL #16
+    MOVK x4, #0x0000, LSL #32
+    MOVK x4, #0xFFFF, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0xFF00
+    MOVK x4, #0x0000, LSL #16
+    MOVK x4, #0xFF00, LSL #32
+    MOVK x4, #0x0000, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #8
+    LSR x2, x0, #8
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0x00FF
+    MOVK x4, #0xFF00, LSL #16
+    MOVK x4, #0x00FF, LSL #32
+    MOVK x4, #0xFF00, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0x00F0
+    MOVK x4, #0x00F0, LSL #16
+    MOVK x4, #0x00F0, LSL #32
+    MOVK x4, #0x00F0, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #4
+    LSR x2, x0, #4
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0xF00F
+    MOVK x4, #0xF00F, LSL #16
+    MOVK x4, #0xF00F, LSL #32
+    MOVK x4, #0xF00F, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0x0C0C
+    MOVK x4, #0x0C0C, LSL #16
+    MOVK x4, #0x0C0C, LSL #32
+    MOVK x4, #0x0C0C, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #2
+    LSR x2, x0, #2
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0xC3C3
+    MOVK x4, #0xC3C3, LSL #16
+    MOVK x4, #0xC3C3, LSL #32
+    MOVK x4, #0xC3C3, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+
+
+    MOVZ x4, #0x2222
+    MOVK x4, #0x2222, LSL #16
+    MOVK x4, #0x2222, LSL #32
+    MOVK x4, #0x2222, LSL #48
+
+    ANDS x1, x0, x4
+    LSL x1, x1, #1
+    LSR x2, x0, #1
+    ANDS x2, x2, x4
+
+    MOVZ x4, #0x9999
+    MOVK x4, #0x9999, LSL #16
+    MOVK x4, #0x9999, LSL #32
+    MOVK x4, #0x9999, LSL #48
+
+    ANDS x3, x0, x4
+    ORR x0, x1, x2
+    ORR x0, x0, x3
+
+    
 
     ret
 	.size	transpose, .-transpose
@@ -91,7 +432,56 @@ compare:
     // Input parameter a is passed in X0; input parameter b is passed in X1.
     // Output value is returned in X0.
 
+    LDUR x2, [x0, #0]
+    LDUR x3, [x1, #0]
+    CMP x2, x3
+    B.NE different
+
+    LDUR x2, [x0, #8]
+    LDUR x3, [x1, #8]
+    // get first three bytes
+    MOVZ x4, #0xFFFF
+    MOVK x4, #0xFF00, LSL #16
+    ANDS x2, x2, x4
+    ANDS x3, x3, x4
+    CMP x2, x3
+    B.NE different
+
+    LDUR x2, [x0, #16]
+    LDUR x3, [x1, #16]
+    CMP x2, x3
+    B.NE different
+
+    //get first byte
+    LDUR x2, [x0, #24]
+    LDUR x3, [x1, #24]
+    MOVZ x4, #0xFF
+    ANDS x2, x2, x4
+    ANDS x3, x3, x4
+    CMP x2, x3
+    B.NE different
+
+    LDUR x2, [x0, #32]
+    LDUR x3, [x1, #32]
+    CMP x2, x3
+    B.NE different
+
+    LDUR x2, [x0, #40]
+    LDUR x3, [x1, #40]
+    MOVZ x4, #0xFF
+    ANDS x2, x2, x4
+    ANDS x3, x3, x4
+    CMP x2, x3
+    B.NE different
+
+    MOVZ x0, #0
     ret
+
+different:
+    MOVZ x0, #1
+    ret
+
+
     .size   compare, .-compare
     // ... and ends with the .size above this line.
 
