@@ -29,11 +29,16 @@ def is_sp(operand: str):
     return operand == "SP"
 
 
+def is_imm(operand: str):
+    return not (is_sp(operand) or is_xzr(operand) or is_wreg_operand(operand) or is_xgpr_operand(operand))
+    #return operand.isnumeric() or (operand.startswith("#") and operand[1:].isnumeric())
+
+
 def verify(line: str):
     # now we need to parse the actual instruction
     # chop off any comment if necessary
     line = line.split("//")[0].strip()
-    
+
     if not line:
         return True, ""
     # ignore labels
@@ -136,8 +141,8 @@ def verify(line: str):
         else:
             return True, ""
 
-    # ALU_RI opcodes
-    if opcode in ["ADD", "SUB", "LSL", "LSR", "UBFM", "ASR"]:
+    # ALU_RI opcodes (except UBFM, since it has 2 immediates)
+    if opcode in ["ADD", "SUB", "LSL", "LSR", "ASR"]:
         # should be the immediate version
         # Of the form ADD <Xd|SP>, <Xn|SP>, #<imm>
         tokens = re.split(",\\s*|\\s+", line)
@@ -152,6 +157,22 @@ def verify(line: str):
             return False, f"using an RR variant of {opcode}"
         else:
             return True, ""
+
+    # UBFM
+    if opcode in ["UBFM"]:
+        tokens = re.split(r",\s*|\s+", line)
+        if len(tokens) != 5:
+            return (
+                False,
+                'UBFM has wrong number of arguments. Syntax should be "UBFM <Xd>, <Xn>, #<immr>, #<imms>"',
+            )
+        elif is_wreg_operand(tokens[1]) or is_wreg_operand(tokens[2]):
+            return False, "using W registers"
+        elif not is_imm(tokens[3]) or not is_imm(tokens[4]):
+            return False, 'UBFM must have two immediates. Syntax is: "UBFM <Xd>, <Xn>, #<immr>, #<imms>"'
+        else:
+            return True, ""
+
     return False, "disallowed opcode"
 
 
@@ -197,7 +218,7 @@ def verify_hamming_decode_bl(lines: list[str]):
                 calls_hamming_distance = True
     if not calls_hamming_distance:
         return False, "\n\tfunction fails to call BL hamming_distance"
-    return True, ""        
+    return True, ""
 
 
 
@@ -222,9 +243,9 @@ with open(sys.argv[1], "r") as infile:
     result, reason = verify_straight_line(lines)
     if not result:
         print(f"hamming_distance failed verification. Reason: {reason}")
-        
-        
-    #verifying transpose 
+
+
+    #verifying transpose
     while not infile.readline().strip().startswith("transpose"):
         pass
     lines = []
@@ -252,7 +273,7 @@ with open(sys.argv[1], "r") as infile:
     result, reason = verify_tree_depth_is_recursive(lines)
     if not result:
         print(f"tree_depth failed verification. Reason: {reason}")
-    
+
     while not infile.readline().strip().startswith("hamming_decode"):
         pass
     lines = []

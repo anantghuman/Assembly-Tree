@@ -394,8 +394,6 @@ transpose:
     ORR x0, x1, x2
     ORR x0, x0, x3
 
-
-
     MOVZ x4, #0x2222
     MOVK x4, #0x2222, LSL #16
     MOVK x4, #0x2222, LSL #32
@@ -494,8 +492,49 @@ change_case:
     // (STUDENT TODO) Code for change_case goes here.
     // Input parameter str is passed in X0; input parameter flag is passed in X1.
     // There is no output value. Parameter str will be mutated.
+    LDUR x2, [x0] 
+    MOVZ x3, 0xFF
+    ANDS x2, x2, x3        
+    CMP x2, #0        
+    B.EQ exit              
+    MOVZ x7, #1
+    MOVZ x6, #32
+    CMP x1, #0              
+    B.GT to_uppercase      
+    B.EQ to_lowercase      
 
-ret
+to_lowercase:
+    CMP x2, 'A'             
+    B.LT next_byte          
+    CMP x2, 'Z'            
+    B.GT next_byte         
+    ADDS x2, x2, x6       
+    B store_byte
+
+to_uppercase:
+    CMP x2, 'a'         
+    B.LT next_byte          
+    CMP x2, 'z'            
+    B.GT next_byte  
+    SUBS x2, x2, x6   
+    B store_byte
+
+store_byte:
+    LDUR x4, [x0]   
+    MOVZ x5,#0xFF00
+    MOVK x5, #0xFFFF, LSL #16  
+    MOVK x5, #0xFFFF, LSL #32
+    MOVK x5, #0xFFFF, LSL #48
+    ANDS x4, x4, x5  
+    ORR x4, x4, x2
+    STUR x4, [x0]          
+
+next_byte:
+    ADDS x0, x0, x7       
+    B change_case          
+
+exit:
+    ret                     // Return from the function
 
 	.size	change_case, .-change_case
 	// ... and ends with the .size above this line.
@@ -510,6 +549,22 @@ tree_depth:
     // (STUDENT TODO) Code for tree_depth goes here.
     // Input parameter root is passed in X0.
     // Output value is returned in X0.
+    LDUR x2, [x0]    
+    CMP x2, #0
+    BL.GT existing_left_child
+    LDUR x3, [x0, #8]
+    CMP x3, #0
+    BL.GT existing_right_child
+    MOVZ x0, x2
+
+existing_left_child:
+    ADDS x3, x3, #1
+    ret
+
+existing_right_child:
+    ADDS x4, x4, #1
+    ret
+
 
     ret
 	.size	tree_depth, .-tree_depth
