@@ -549,24 +549,44 @@ tree_depth:
     // (STUDENT TODO) Code for tree_depth goes here.
     // Input parameter root is passed in X0.
     // Output value is returned in X0.
-    LDUR x2, [x0]    
-    CMP x2, #0
-    BL.GT existing_left_child
-    LDUR x3, [x0, #8]
-    CMP x3, #0
-    BL.GT existing_right_child
-    MOVZ x0, x2
+    CMP x0, #0
+    B.EQ exit
+    MOVZ x6, #1
+    SUB sp, sp, 32
+    STUR x29, [sp]
+    STUR x30, [sp, #8]
+    LDUR x29, [sp, #0]
+    STUR x19, [sp, #16]
+    STUR x20, [sp, #24]
+    ORR x20, x0, xzr
+    LDUR x0, [x0]
+    BL tree_depth
+    ORR x19, x0, xzr
+    LDUR x0, [x20, #8]
+    BL tree_depth
+    ADDS x1, x0, x6
+    CMP x19, x0
+    B.LE dont
+    ADDS x0, x19, x6
+    B done
 
-existing_left_child:
-    ADDS x3, x3, #1
+dont:
+    ORR x0, x1, xzr
+done:
+    LDUR x19, [sp, #16]
+    LDUR x20, [sp, #24]
+    LDUR x29, [sp, #0]
+    LDUR x30, [sp, #8]
+    ADD sp, sp, #32
+    ret
+.exit:
+    // returns -1
+    MOVZ x0, #0xFFFF
+    MOVK x0, #0xFFFF, LSL #16
+    MOVK x0, #0xFFFF, LSL #32
+    MOVK x0, #0xFFFF, LSL #48
     ret
 
-existing_right_child:
-    ADDS x4, x4, #1
-    ret
-
-
-    ret
 	.size	tree_depth, .-tree_depth
 	// ... and ends with the .size above this line.
 
@@ -581,7 +601,8 @@ hamming_decode:
     // (STUDENT TODO) Code for hamming_decode goes here.
     // Input parameter code is passed in X0; input parameter hamming_codes is passed in X1.
     // Output value is returned in X0.
+   
+
     
     ret
-
     .size   hamming_decode, .-hamming_decode
