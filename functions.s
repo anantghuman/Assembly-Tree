@@ -549,45 +549,45 @@ tree_depth:
     // (STUDENT TODO) Code for tree_depth goes here.
     // Input parameter root is passed in X0.
     // Output value is returned in X0.
-    CMP     x0, #0
-    B.EQ     root_null
+    CMP x0, #0
+    B.EQ root_null
 
-    MOVZ    x6, #1
+    MOVZ x6, #1
 
-    SUB     sp, sp, #32
-    STUR    x29, [sp, #0]     
-    STUR    x30, [sp, #8]   
-    STUR    x19, [sp, #16] 
-    STUR    x20, [sp, #24]   
-    ORR     x20, x0, xzr
+    SUB sp, sp, #32
+    STUR x29, [sp, #0]     
+    STUR x30, [sp, #8]   
+    STUR x19, [sp, #16] 
+    STUR x20, [sp, #24]   
+    ORR x20, x0, xzr
 
-    LDUR    x0, [x0, #0]
-    BL      tree_depth         
-    ORR     x19, x0, xzr      
+    LDUR x0, [x0, #0]
+    BL tree_depth         
+    ORR x19, x0, xzr      
 
-    LDUR    x0, [x20, #8]
-    BL      tree_depth         
-    ADDS    x1, x0, x6     
+    LDUR x0, [x20, #8]
+    BL tree_depth         
+    ADDS x1, x0, x6     
 
-    CMP     x19, x0            
-    B.LE    right_bigger
-    ADDS    x0, x19, x6
-    B       .done
+    CMP x19, x0            
+    B.LE right_bigger
+    ADDS x0, x19, x6
+    B done
 
 right_bigger:
-    ORR     x0, x1, xzr     
+    ORR x0, x1, xzr     
 
-.done:
-    LDUR    x19, [sp, #16]
-    LDUR    x20, [sp, #24]
-    LDUR    x29, [sp, #0]
-    LDUR    x30, [sp, #8]
-    ADD     sp, sp, #32
-    RET
+done:
+    LDUR x19, [sp, #16]
+    LDUR x20, [sp, #24]
+    LDUR x29, [sp, #0]
+    LDUR x30, [sp, #8]
+    ADD sp, sp, #32
+    ret
 
 root_null:
     MOVZ     x0, #0
-    RET
+    ret
 
 	.size	tree_depth, .-tree_depth
 	// ... and ends with the .size above this line.
@@ -603,58 +603,57 @@ hamming_decode:
     // (STUDENT TODO) Code for hamming_decode goes here.
     // Input parameter code is passed in X0; input parameter hamming_codes is passed in X1.
     // Output value is returned in X0.
-    SUB    sp, sp, #64
-    STUR   x29, [sp, #0]
-    STUR   x30, [sp, #8]
-    STUR   x19, [sp, #16]
-    STUR   x20, [sp, #24]
-    STUR   x21, [sp, #32]
-    STUR   x22, [sp, #40]
-    STUR   x23, [sp, #48]
-    STUR   x24, [sp, #56]
+    SUB sp, sp, #64
+    STUR x29, [sp, #0]
+    STUR x30, [sp, #8]
+    STUR x19, [sp, #16]
+    STUR x20, [sp, #24]
+    STUR x21, [sp, #32]
+    STUR x22, [sp, #40]
+    STUR x23, [sp, #48]
+    STUR x24, [sp, #56]
 
-    MOVZ   x6, #0xFF
-    ANDS   x23, x0, x6
-    ORR    x22, x1, xzr
-    MOVZ   x19, #0
+    MOVZ x6, #0xFF
+    ANDS x23, x0, x6
+    ORR x22, x1, xzr
+    MOVZ x19, #0
 
-    MOVZ   x21, #0xFF
-    MOVZ   x20, #0xFFFF
-    MOVZ   x24, #1
+    MOVZ x21, #0xFF
+    MOVZ x20, #0xFFFF
+    MOVZ x24, #1
 
 loop:
-    CMP    x19, #16
-    B.EQ    done
+    CMP x19, #16
+    B.EQ epilogue
 
-    ADDS   x7, x22, x19
-    LDUR   x7, [x7]
-    ANDS   x7, x7, x6
+    ADDS x7, x22, x19
+    LDUR x7, [x7]
+    ANDS x7, x7, x6
 
-    ORR    x0, x23, xzr
-    ORR    x1, x7, xzr
-    BL     hamming_distance
+    ORR x0, x23, xzr
+    ORR x1, x7, xzr
+    BL hamming_distance
 
-    CMP    x0, x20
-    B.GE    next
-    ORR    x21, x19, xzr
-    ORR    x20, x0, xzr
+    CMP x0, x20
+    B.GE next
+    ORR x21, x19, xzr
+    ORR x20, x0, xzr
 
 next:
-    ADDS    x19, x19, x24
-    B      loop
+    ADDS x19, x19, x24
+    B loop
 
-done:
-    ANDS   x0, x21, x6
-    LDUR   x19, [sp, #16]
-    LDUR   x20, [sp, #24]
-    LDUR   x21, [sp, #32]
-    LDUR   x22, [sp, #40]
-    LDUR   x23, [sp, #48]
-    LDUR   x24, [sp, #56]
-    LDUR   x29, [sp, #0]
-    LDUR   x30, [sp, #8]
-    ADD    sp, sp, #64
-    RET
+epilogue:
+    ANDS x0, x21, x6
+    LDUR x19, [sp, #16]
+    LDUR x20, [sp, #24]
+    LDUR x21, [sp, #32]
+    LDUR x22, [sp, #40]
+    LDUR x23, [sp, #48]
+    LDUR x24, [sp, #56]
+    LDUR x29, [sp, #0]
+    LDUR x30, [sp, #8]
+    ADD sp, sp, #64
+    ret
 
-    
     .size   hamming_decode, .-hamming_decode
